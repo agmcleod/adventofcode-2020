@@ -48,17 +48,26 @@ fn main() {
     let mut correct_count_p2 = 0;
 
     for policy in &policies {
-        let count = policy.pw.chars().fold(0, |sum, letter| {
+        let mut count = 0;
+        let mut p2_count = 0;
+        for (i, letter) in policy.pw.chars().enumerate() {
             if letter == policy.letter {
-                return sum + 1
+                count += 1;
+                if i + 1 == policy.min || i + 1 == policy.max {
+                    p2_count += 1;
+                }
             }
-            return sum
-        });
+        }
 
         if count <= policy.max && count >= policy.min {
             correct_count += 1;
         }
+
+        if p2_count == 1 {
+            correct_count_p2 += 1;
+        }
     }
 
     println!("{}", correct_count);
+    println!("{}", correct_count_p2);
 }
