@@ -28,7 +28,7 @@ fn sum_numbers_to_2020(nums: &Vec<u32>, index_count: usize) -> u32 {
             }
         }
 
-        for i in (incr_index + 1..indexes.len()) {
+        for i in incr_index + 1..indexes.len() {
             indexes[i] = indexes[i - 1] + 1;
         }
     }
