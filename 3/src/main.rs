@@ -8,13 +8,36 @@ enum TileType {
     Tree,
 }
 
+struct Slope {
+    x_pos: usize,
+    x_speed: usize,
+    y_speed: usize,
+    tree_count: usize,
+}
+
+impl Slope {
+    fn new(x_speed: usize, y_speed: usize) -> Self {
+        Slope {
+            x_pos: 0,
+            x_speed,
+            y_speed,
+            tree_count: 0,
+        }
+    }
+}
+
 fn main() {
     let text = read_text("3/input.txt").unwrap();
 
     let mut tiles = HashMap::new();
 
-    let mut tobbogan_x = 0;
-    let mut tree_count = 0;
+    let mut slopes = vec![
+        Slope::new(3, 1),
+        Slope::new(1, 1),
+        Slope::new(5, 1),
+        Slope::new(7, 1),
+        Slope::new(1, 2),
+    ];
 
     for (y, line) in text.lines().enumerate() {
         let width = line.chars().count();
@@ -32,16 +55,21 @@ fn main() {
 
         // skip first line
         if y > 0 {
-            tobbogan_x += 3;
-            if let Some(tile_type) = tiles.get(&(tobbogan_x % width, y)) {
-                if  *tile_type == TileType::Tree {
-                    tree_count += 1;
+            for slope in &mut slopes {
+                if y % slope.y_speed == 0 {
+                    slope.x_pos += slope.x_speed;
+                    if let Some(tile_type) = tiles.get(&(slope.x_pos % width, y)) {
+                        if  *tile_type == TileType::Tree {
+                            slope.tree_count += 1;
+                        }
+                    }
                 }
-            } else {
-                panic!("No coord found for: ({} % {} = {},{})", tobbogan_x, width, tobbogan_x % width, y);
             }
         }
     }
 
-    println!("{}", tree_count);
+    println!("{}", slopes[0].tree_count);
+    println!("{}", slopes.iter().fold(1, |acc, slope| {
+        slope.tree_count * acc
+    }));
 }
