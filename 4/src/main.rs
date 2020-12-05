@@ -1,3 +1,5 @@
+use regex::Regex;
+
 use read_input::read_text;
 
 #[derive(Debug)]
@@ -26,7 +28,17 @@ impl Passport {
         }
     }
 
-    fn is_valid(&self) -> bool {
+    fn field_in_range(valid: &mut bool, value: &String, min: usize, max: usize) {
+        if let Ok(value) = value.parse::<usize>() {
+            if value < min || value > max {
+                *valid = false;
+            }
+        } else {
+            *valid = false;
+        }
+    }
+
+    fn has_required_fields(&self) -> bool {
         self.byr.is_some()
             && self.iyr.is_some()
             && self.eyr.is_some()
@@ -34,6 +46,57 @@ impl Passport {
             && self.hcl.is_some()
             && self.ecl.is_some()
             && self.pid.is_some()
+    }
+
+    fn is_valid(&self) -> bool {
+        if !self.has_required_fields() {
+            return false;
+        }
+
+        let mut valid = true;
+        let byr = self.byr.as_ref().unwrap();
+        Passport::field_in_range(&mut valid, byr, 1920, 2002);
+
+        let iyr = self.iyr.as_ref().unwrap();
+        Passport::field_in_range(&mut valid, iyr, 2010, 2020);
+
+        let eyr = self.eyr.as_ref().unwrap();
+        Passport::field_in_range(&mut valid, eyr, 2020, 2030);
+
+        let hgt = self.hgt.as_ref().unwrap();
+        if hgt.contains("cm") {
+            Passport::field_in_range(&mut valid, &hgt.replace("cm", ""), 150, 193);
+        } else if hgt.contains("in") {
+            Passport::field_in_range(&mut valid, &hgt.replace("in", ""), 59, 76);
+        } else {
+            valid = false;
+        }
+
+        let re = Regex::new("^#[a-f0-9]{6}$").unwrap();
+
+        if !re.is_match(self.hcl.as_ref().unwrap()) {
+            valid = false;
+        }
+
+        let ecl = self.ecl.as_ref().unwrap();
+        if ecl != "amb"
+            && ecl != "blu"
+            && ecl != "brn"
+            && ecl != "gry"
+            && ecl != "grn"
+            && ecl != "hzl"
+            && ecl != "oth"
+        {
+            valid = false;
+        }
+
+        let pid = self.pid.as_ref().unwrap();
+        let re = Regex::new("^\\d{9}$").unwrap();
+        if !re.is_match(pid) {
+            valid = false;
+        }
+
+        valid
     }
 }
 
@@ -86,8 +149,15 @@ fn main() {
     passports.push(passport);
 
     println!(
-        "{} {}",
+        "{} {} {}",
         passports.len(),
+        passports.iter().fold(0, |acc, passport| {
+            if passport.has_required_fields() {
+                acc + 1
+            } else {
+                acc + 0
+            }
+        }),
         passports.iter().fold(0, |acc, passport| {
             if passport.is_valid() {
                 acc + 1
