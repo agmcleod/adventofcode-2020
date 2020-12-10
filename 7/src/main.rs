@@ -56,7 +56,9 @@ fn main() {
 
     println!("{}", bags_that_contain_shiny_gold.len());
 
-    let mut targets = bags.get("shiny gold").unwrap().clone();
+    let mut targets: Vec<(usize, usize, String)> = bags.get("shiny gold").unwrap().iter().map(|target| {
+        (1, target.0, target.1.clone())
+    }).collect();
     let mut sum = 0;
 
     loop {
@@ -65,5 +67,16 @@ fn main() {
             break
         }
 
+        let target = target.unwrap();
+
+        sum += target.0 * target.1;
+
+        if let Some(children) = bags.get(&target.2) {
+            for child in children {
+                targets.push((target.0 * target.1, child.0, child.1.clone()));
+            }
+        }
     }
+
+    println!("{}", sum);
 }
