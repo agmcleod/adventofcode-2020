@@ -10,6 +10,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "eight"
+version = "0.1.0"
+dependencies = [
+ "read_input",
+]
+
+[[package]]
 name = "five"
 version = "0.1.0"
 dependencies = [
