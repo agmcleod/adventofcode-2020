@@ -1,5 +1,35 @@
 use read_input::read_text;
 
+fn p2(adapters: &Vec<usize>) {
+    let mut work: Vec<usize> = vec![0];
+
+    let mut count = 0;
+
+    println!("{:?}", adapters);
+
+    while work.len() > 0 {
+        let index = work.pop().unwrap();
+        if index == adapters.len() - 1 {
+            count += 1;
+            continue;
+        }
+        let n = adapters[index];
+        let mut next_indexes = (index + 1..index + 3)
+            .filter(|i| {
+                if *i >= adapters.len() {
+                    return false;
+                }
+
+                adapters[*i] - n <= 3
+            })
+            .collect();
+
+        work.append(&mut next_indexes);
+    }
+
+    println!("{}", count);
+}
+
 fn main() {
     let text = read_text("10/input.txt").unwrap();
 
@@ -18,4 +48,6 @@ fn main() {
     }
 
     println!("{} * {} = {}", ones, threes, ones * threes);
+
+    p2(&adapters);
 }
