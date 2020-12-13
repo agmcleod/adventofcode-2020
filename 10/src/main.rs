@@ -5,8 +5,6 @@ fn p2(adapters: &Vec<usize>) {
 
     let mut count = 0;
 
-    println!("{:?}", adapters);
-
     while work.len() > 0 {
         let index = work.pop().unwrap();
         if index == adapters.len() - 1 {
@@ -14,7 +12,7 @@ fn p2(adapters: &Vec<usize>) {
             continue;
         }
         let n = adapters[index];
-        let mut next_indexes = (index + 1..index + 3)
+        let mut next_indexes = (index + 1..=index + 3)
             .filter(|i| {
                 if *i >= adapters.len() {
                     return false;
@@ -35,8 +33,9 @@ fn main() {
 
     let mut adapters: Vec<usize> = text.lines().map(|n| n.parse::<usize>().unwrap()).collect();
     adapters.sort();
+    adapters.insert(0, 0);
 
-    let mut ones = 1;
+    let mut ones = 0;
     let mut threes = 1;
     for a in adapters.windows(2) {
         let diff = a[1] - a[0];
