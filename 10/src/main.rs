@@ -1,7 +1,7 @@
 use read_input::read_text;
 
 fn p2(adapters: &Vec<usize>) {
-    let mut permutations: Vec<Vec<usize>> = vec![vec![0]];
+    let mut work: Vec<usize> = vec![0];
 
     let mut count = 0;
 
@@ -22,11 +22,7 @@ fn p2(adapters: &Vec<usize>) {
             })
             .collect();
 
-        for (offset_index, index_to_remove) in permutations_to_ditch.iter().enumerate() {
-            permutations.remove(*index_to_remove - offset_index);
-        }
-
-        permutations.append(&mut permutations_to_add);
+        work.append(&mut next_indexes);
     }
 
     println!("{}", count);
