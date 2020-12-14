@@ -45,11 +45,11 @@ fn main() {
             match ch {
                 '.' => {
                     tiles.insert((x, y), TileType::Open);
-                },
+                }
                 '#' => {
                     tiles.insert((x, y), TileType::Tree);
-                },
-                _ => panic!("Invalid character {}", ch)
+                }
+                _ => panic!("Invalid character {}", ch),
             }
         }
 
@@ -59,7 +59,7 @@ fn main() {
                 if y % slope.y_speed == 0 {
                     slope.x_pos += slope.x_speed;
                     if let Some(tile_type) = tiles.get(&(slope.x_pos % width, y)) {
-                        if  *tile_type == TileType::Tree {
+                        if *tile_type == TileType::Tree {
                             slope.tree_count += 1;
                         }
                     }
@@ -69,7 +69,10 @@ fn main() {
     }
 
     println!("{}", slopes[0].tree_count);
-    println!("{}", slopes.iter().fold(1, |acc, slope| {
-        slope.tree_count * acc
-    }));
+    println!(
+        "{}",
+        slopes
+            .iter()
+            .fold(1, |acc, slope| { slope.tree_count * acc })
+    );
 }

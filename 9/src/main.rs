@@ -17,7 +17,7 @@ fn main() {
                 for j in i..25 {
                     if number_set[i] + number_set[j] == n {
                         is_valid = true;
-                        break 'i_loop
+                        break 'i_loop;
                     }
                 }
             }
@@ -41,12 +41,12 @@ fn main() {
             value += all_numbers[next_index];
             if value == invalid_number {
                 end_index = Some(next_index);
-                break
+                break;
             }
 
             next_index += 1;
             if next_index == all_numbers.len() {
-                break
+                break;
             }
         }
         if end_index.is_some() {
@@ -57,7 +57,7 @@ fn main() {
                 max = cmp::max(max, all_numbers[index]);
             }
             println!("{}", min + max);
-            break
+            break;
         }
     }
 }

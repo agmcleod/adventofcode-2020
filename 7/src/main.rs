@@ -10,22 +10,32 @@ fn main() {
 
     for line in text.lines() {
         let mut iter = line.splitn(2, " bags contain ");
-        let container_colour = iter.next().unwrap().replace(" bags", "").replace(" bag", "");
+        let container_colour = iter
+            .next()
+            .unwrap()
+            .replace(" bags", "")
+            .replace(" bag", "");
         let children = iter.next().unwrap();
         let mut child_bags = Vec::new();
         for child in children.replace(".", "").split(", ") {
             let mut iter = child.splitn(2, " ");
             if let Ok(n) = iter.next().unwrap().parse::<usize>() {
-                let child_bag_name = iter.next().unwrap().replace(" bags", "").replace(" bag", "");
+                let child_bag_name = iter
+                    .next()
+                    .unwrap()
+                    .replace(" bags", "")
+                    .replace(" bag", "");
 
                 child_bags.push((n, child_bag_name.to_string()));
                 if bags_to_parent.contains_key(&child_bag_name) {
-                    bags_to_parent.get_mut(&child_bag_name).unwrap().push(container_colour.clone());
+                    bags_to_parent
+                        .get_mut(&child_bag_name)
+                        .unwrap()
+                        .push(container_colour.clone());
                 } else {
                     bags_to_parent.insert(child_bag_name, vec![container_colour.clone()]);
                 }
             }
-
         }
 
         bags.insert(container_colour.to_string(), child_bags);
@@ -37,7 +47,7 @@ fn main() {
     loop {
         let target = targets.pop();
         if target.is_none() {
-            break
+            break;
         }
 
         let target = target.unwrap();
@@ -56,15 +66,18 @@ fn main() {
 
     println!("{}", bags_that_contain_shiny_gold.len());
 
-    let mut targets: Vec<(usize, usize, String)> = bags.get("shiny gold").unwrap().iter().map(|target| {
-        (1, target.0, target.1.clone())
-    }).collect();
+    let mut targets: Vec<(usize, usize, String)> = bags
+        .get("shiny gold")
+        .unwrap()
+        .iter()
+        .map(|target| (1, target.0, target.1.clone()))
+        .collect();
     let mut sum = 0;
 
     loop {
         let target = targets.pop();
         if target.is_none() {
-            break
+            break;
         }
 
         let target = target.unwrap();

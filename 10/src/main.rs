@@ -1,26 +1,33 @@
 use read_input::read_text;
 
+fn get_next_indexes(adapters: &Vec<usize>, index: usize) -> Vec<usize> {
+    let n = adapters[index];
+    let index = index as i32;
+    (index - 3..=index - 1)
+        .rev()
+        .filter(|i| {
+            if *i < 0 {
+                return false;
+            }
+
+            n - adapters[*i as usize] <= 3
+        })
+        .map(|i| i as usize)
+        .collect()
+}
+
 fn p2(adapters: &Vec<usize>) {
-    let mut work: Vec<usize> = vec![0];
+    let mut work: Vec<usize> = vec![adapters.len() - 1];
 
     let mut count = 0;
 
     while work.len() > 0 {
         let index = work.pop().unwrap();
-        if index == adapters.len() - 1 {
+        if index == 0 {
             count += 1;
             continue;
         }
-        let n = adapters[index];
-        let mut next_indexes = (index + 1..=index + 3)
-            .filter(|i| {
-                if *i >= adapters.len() {
-                    return false;
-                }
-
-                adapters[*i] - n <= 3
-            })
-            .collect();
+        let mut next_indexes = get_next_indexes(adapters, index);
 
         work.append(&mut next_indexes);
     }

@@ -6,13 +6,11 @@ fn sum_numbers_to_2020(nums: &Vec<u32>, index_count: usize) -> u32 {
     loop {
         // just a safety
         if indexes[index_count - 1] >= nums.len() {
-            break
+            break;
         }
 
-        if indexes.iter().fold(0, |sum, idx| {
-            nums[*idx] + sum
-        }) == 2020 {
-            break
+        if indexes.iter().fold(0, |sum, idx| nums[*idx] + sum) == 2020 {
+            break;
         }
 
         let mut incr_index = index_count - 1;
@@ -24,7 +22,7 @@ fn sum_numbers_to_2020(nums: &Vec<u32>, index_count: usize) -> u32 {
                 }
                 incr_index -= 1;
             } else {
-                break
+                break;
             }
         }
 
@@ -33,18 +31,17 @@ fn sum_numbers_to_2020(nums: &Vec<u32>, index_count: usize) -> u32 {
         }
     }
 
-    indexes.iter().fold(1, |prod, idx| {
-        nums[*idx] * prod
-    })
+    indexes.iter().fold(1, |prod, idx| nums[*idx] * prod)
 }
-
 
 fn main() {
     let text = read_text("1/input.txt").unwrap();
 
-    let mut nums: Vec<u32> = text.lines().filter(|v| {
-        *v != ""
-    }).map(|v| v.parse().expect("Couldn't parse number")).collect();
+    let mut nums: Vec<u32> = text
+        .lines()
+        .filter(|v| *v != "")
+        .map(|v| v.parse().expect("Couldn't parse number"))
+        .collect();
 
     nums.sort();
 

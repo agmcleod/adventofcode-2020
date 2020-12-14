@@ -14,25 +14,25 @@ fn run_program(commands: &Vec<(&str, i32)>) -> (i32, bool) {
         match *cmd {
             "nop" => {
                 index += 1;
-            },
+            }
             "acc" => {
                 acc += *n;
                 index += 1;
-            },
+            }
             "jmp" => {
                 index += *n;
-            },
-            _ => panic!("unrecognized command {}", cmd)
+            }
+            _ => panic!("unrecognized command {}", cmd),
         }
 
         if used_indexes.contains(&index) {
-            break
+            break;
         }
         used_indexes.insert(index);
 
         if index as usize >= commands.len() {
             exited_successfuly = true;
-            break
+            break;
         }
     }
 
@@ -61,7 +61,7 @@ fn main() {
 
         if *cmd == "nop" || *cmd == "jmp" {
             let mut commands = commands.clone();
-            let mut should_run =  false;
+            let mut should_run = false;
             if *cmd == "nop" && *amt != 0 {
                 commands[index].0 = "jmp";
                 should_run = true;
@@ -74,7 +74,7 @@ fn main() {
                 let (acc, exited) = run_program(&commands);
                 if exited {
                     println!("{}", acc);
-                    break
+                    break;
                 }
             }
         }

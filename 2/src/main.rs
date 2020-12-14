@@ -14,12 +14,24 @@ fn get_policies_from_input(text: &String) -> Vec<Policy> {
     for line in text.lines() {
         let mut itr = line.split(": ");
 
-        let mut policy = Policy { min: 0, max: 0, letter: ' ', pw: "".to_string() };
+        let mut policy = Policy {
+            min: 0,
+            max: 0,
+            letter: ' ',
+            pw: "".to_string(),
+        };
 
         if let Some(first) = itr.next() {
             let mut first_itr = first.split(" ");
             if let Some(ranges) = first_itr.next() {
-                let nums: Vec<usize> = ranges.split("-").map(|number| number.parse().expect(&format!("Could not parse {}", number))).collect();
+                let nums: Vec<usize> = ranges
+                    .split("-")
+                    .map(|number| {
+                        number
+                            .parse()
+                            .expect(&format!("Could not parse {}", number))
+                    })
+                    .collect();
                 policy.min = nums[0];
                 policy.max = nums[1];
             }
