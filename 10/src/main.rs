@@ -16,8 +16,8 @@ fn get_next_indexes(adapters: &Vec<usize>, index: usize) -> Vec<usize> {
         .collect()
 }
 
-fn p2(adapters: &Vec<usize>) {
-    let mut work: Vec<usize> = vec![adapters.len() - 1];
+fn get_variations_in_set(set: &Vec<usize>) -> usize {
+    let mut work: Vec<usize> = vec![set.len() - 1];
 
     let mut count = 0;
 
@@ -27,12 +27,35 @@ fn p2(adapters: &Vec<usize>) {
             count += 1;
             continue;
         }
-        let mut next_indexes = get_next_indexes(adapters, index);
+        let mut next_indexes = get_next_indexes(set, index);
 
         work.append(&mut next_indexes);
     }
 
-    println!("{}", count);
+    count
+}
+
+fn p2(adapters: &Vec<usize>) {
+    let mut sets = Vec::new();
+    let mut set = Vec::new();
+    let window_count = adapters.windows(2).count();
+    for (i, pair) in adapters.windows(2).enumerate() {
+        set.push(pair[0]);
+        let diff = pair[1] - pair[0];
+        if diff == 3 {
+            sets.push(set);
+            set = Vec::new();
+        }
+
+        if i == window_count - 1 {
+            set.push(pair[1]);
+        }
+    }
+    sets.push(set);
+
+    println!("{}", sets.iter().fold(1, |product, set| {
+        product * get_variations_in_set(set)
+    }));
 }
 
 fn main() {
@@ -44,8 +67,8 @@ fn main() {
 
     let mut ones = 0;
     let mut threes = 1;
-    for a in adapters.windows(2) {
-        let diff = a[1] - a[0];
+    for pair in adapters.windows(2) {
+        let diff = pair[1] - pair[0];
         if diff == 1 {
             ones += 1;
         } else if diff == 3 {
