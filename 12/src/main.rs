@@ -2,62 +2,49 @@ use std::f32::consts::PI;
 
 use read_input::read_text;
 
-struct Ship {
-    pos: (i32, i32),
-    direction: (i32, i32),
-}
-
-impl Ship {
-    fn rotate(&mut self, deg: i32) {
-        let rad = (deg as f32) * PI / 180.0;
-        let (x, y) = self.direction;
-        let x = x as f32;
-        let y = y as f32;
-        self.direction = (
-            (x as f32 * rad.cos() - y * rad.sin()) as i32,
-            (x as f32 * rad.sin() + y * rad.cos()) as i32,
-        );
-    }
+fn rotate_vec(vec: &mut (i32, i32), deg: i32) {
+    let rad = (deg as f32) * PI / 180.0;
+    let x = vec.0 as f32;
+    let y = vec.1 as f32;
+    vec.0 = (x * rad.cos() - y * rad.sin()).round() as i32;
+    vec.1 = (x * rad.sin() + y * rad.cos()).round() as i32;
 }
 
 fn main() {
     let text = read_text("12/input.txt").unwrap();
 
-    let mut ship = Ship {
-        pos: (0, 0),
-        direction: (1, 0),
-    };
-
-    // vec.x * cos(ang) - vec.y * sin(ang),
-    // vec.x * sin(ang) + vec.y * cos(ang)
+    let mut ship_pos = (0, 0);
+    let mut ship_dir = (1, 0);
 
     for line in text.lines() {
         let mut iter = line.chars();
         let cmd = iter.next().unwrap();
         let n: i32 = iter.collect::<String>().parse().unwrap();
 
+        // apply_command(cmd, &mut ship_pos, n, &mut ship_dir, &mut ship_pos);
+
         match cmd {
             'F' => {
-                ship.pos.0 += ship.direction.0 * n;
-                ship.pos.1 += ship.direction.1 * n;
+                ship_pos.0 += ship_dir.0 * n;
+                ship_pos.1 += ship_dir.1 * n;
             }
             'N' => {
-                ship.pos.1 -= n;
+                ship_pos.1 -= n;
             }
             'E' => {
-                ship.pos.0 += n;
+                ship_pos.0 += n;
             }
             'S' => {
-                ship.pos.1 += n;
+                ship_pos.1 += n;
             }
             'W' => {
-                ship.pos.0 -= n;
+                ship_pos.0 -= n;
             }
             'L' => {
-                ship.rotate(-1 * n);
+                rotate_vec(&mut ship_dir, -1 * n);
             }
             'R' => {
-                ship.rotate(n);
+                rotate_vec(&mut ship_dir, n);
             }
             _ => {
                 panic!("Unmatched cmd {}", cmd);
@@ -65,7 +52,48 @@ fn main() {
         }
     }
 
-    println!("{}", ship.pos.0.abs() + ship.pos.1.abs());
+    println!("{}", ship_pos.0.abs() + ship_pos.1.abs());
+
+    // p2
+    ship_pos.0 = 0;
+    ship_pos.1 = 0;
+
+    let mut beacon = (10, -1);
+    for line in text.lines() {
+        let mut iter = line.chars();
+        let cmd = iter.next().unwrap();
+        let n: i32 = iter.collect::<String>().parse().unwrap();
+
+        match cmd {
+            'F' => {
+                ship_pos.0 += beacon.0 * n;
+                ship_pos.1 += beacon.1 * n;
+            }
+            'N' => {
+                beacon.1 -= n;
+            }
+            'E' => {
+                beacon.0 += n;
+            }
+            'S' => {
+                beacon.1 += n;
+            }
+            'W' => {
+                beacon.0 -= n;
+            }
+            'L' => {
+                rotate_vec(&mut beacon, -1 * n);
+            }
+            'R' => {
+                rotate_vec(&mut beacon, n);
+            }
+            _ => {
+                panic!("Unmatched cmd {}", cmd);
+            }
+        }
+    }
+
+    println!("{}", ship_pos.0.abs() + ship_pos.1.abs());
 }
 
 #[cfg(test)]
@@ -74,21 +102,22 @@ mod tests {
 
     #[test]
     fn test_rotations() {
-        let mut ship = Ship {
-            pos: (0, 0),
-            direction: (1, 0),
-        };
+        let mut ship_dir = (1, 0);
 
-        ship.rotate(90);
-        assert_eq!(ship.direction, (0, 1));
+        rotate_vec(&mut ship_dir, 90);
+        assert_eq!(ship_dir, (0, 1));
 
-        ship.rotate(-90);
-        assert_eq!(ship.direction, (1, 0));
+        rotate_vec(&mut ship_dir, -90);
+        assert_eq!(ship_dir, (1, 0));
 
-        ship.rotate(-180);
-        assert_eq!(ship.direction, (-1, 0));
+        rotate_vec(&mut ship_dir, -180);
+        assert_eq!(ship_dir, (-1, 0));
 
-        ship.rotate(270);
-        assert_eq!(ship.direction, (0, 1));
+        rotate_vec(&mut ship_dir, 270);
+        assert_eq!(ship_dir, (0, 1));
+
+        let mut pos = (10, -4);
+        rotate_vec(&mut pos, 90);
+        assert_eq!(pos, (4, 10));
     }
 }
