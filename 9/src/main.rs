@@ -1,4 +1,5 @@
 use std::cmp;
+use std::usize::MAX;
 
 use read_input::read_text;
 
@@ -50,7 +51,7 @@ fn main() {
             }
         }
         if end_index.is_some() {
-            let mut min = usize::MAX;
+            let mut min = MAX;
             let mut max = 0;
             for index in i..end_index.unwrap() {
                 min = cmp::min(min, all_numbers[index]);
