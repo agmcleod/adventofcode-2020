@@ -26,13 +26,10 @@ fn main() {
 
     println!("{}", least_wait_route * least_time);
 
-    busses.reverse();
-    let (highest_offset, _) = busses.first().unwrap();
-    let mut timestamp = *highest_offset;
-    loop {
-        for (ts, bus) in busses.iter().skip(1) {
-            if ts % timestamp ==
-        }
-        timestamp += highest_offset;
-    }
+    let multiplier = busses
+        .iter()
+        .fold(1, |prod, (offset, bus)| prod * (offset + bus));
+
+    println!("{}", multiplier);
+    println!("{:?}", busses);
 }
