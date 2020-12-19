@@ -2,9 +2,18 @@ use std::collections::HashMap;
 
 use read_input::read_text;
 
+fn number_to_binary(num: usize, mask: &Vec<char>) -> Vec<char> {
+    let mut binary_number: Vec<char> = format!("{:b}", num).chars().collect();
+    let mut leading: Vec<char> = (0..mask.len() - binary_number.len()).map(|_| '0').collect();
+    leading.append(&mut binary_number);
+
+    leading
+}
+
 fn main() {
     let text = read_text("14/input.txt").unwrap();
     let mut addresses = HashMap::new();
+    let mut addresses_p2 = HashMap::new();
 
     let mut mask = Vec::new();
 
@@ -19,11 +28,7 @@ fn main() {
                 .map(|n| n.parse::<usize>().unwrap())
                 .collect();
 
-            let mut binary_number: Vec<char> = format!("{:b}", numbers[1]).chars().collect();
-            let mut leading: Vec<char> =
-                (0..mask.len() - binary_number.len()).map(|_| '0').collect();
-            leading.append(&mut binary_number);
-            let mut binary_number = leading;
+            let mut binary_number = number_to_binary(numbers[1], &mask);
             for i in 0..binary_number.len() {
                 let mask_value = mask[i];
                 if mask_value == '1' {
