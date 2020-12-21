@@ -53,9 +53,11 @@ fn p2(adapters: &Vec<usize>) {
     }
     sets.push(set);
 
-    println!("{}", sets.iter().fold(1, |product, set| {
-        product * get_variations_in_set(set)
-    }));
+    println!(
+        "{}",
+        sets.iter()
+            .fold(1, |product, set| { product * get_variations_in_set(set) })
+    );
 }
 
 fn main() {

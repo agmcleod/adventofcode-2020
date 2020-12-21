@@ -30,7 +30,11 @@ fn get_neighbour_counts(layout: &HashMap<(i32, i32), char>, x: i32, y: i32) -> (
     (empty_count, occupied_count)
 }
 
-fn change_state(layout: &HashMap<(i32, i32), char>, max_x: i32, max_y: i32) -> HashMap<(i32, i32), char> {
+fn change_state(
+    layout: &HashMap<(i32, i32), char>,
+    max_x: i32,
+    max_y: i32,
+) -> HashMap<(i32, i32), char> {
     let mut new_state = layout.clone();
 
     for y in 0..max_y {
@@ -59,12 +63,12 @@ fn get_neighbour_counts_p2(layout: &HashMap<(i32, i32), char>, x: i32, y: i32) -
             if let Some(ch) = layout.get(&(pos.0, pos.1)) {
                 if *ch == '#' {
                     occupied_count += 1;
-                    break
+                    break;
                 } else if *ch == 'L' {
-                    break
+                    break;
                 }
             } else {
-                break
+                break;
             }
         }
     }
@@ -72,13 +76,17 @@ fn get_neighbour_counts_p2(layout: &HashMap<(i32, i32), char>, x: i32, y: i32) -
     occupied_count
 }
 
-fn change_state_p2(layout: &HashMap<(i32, i32), char>, max_x: i32, max_y: i32) -> HashMap<(i32, i32), char> {
+fn change_state_p2(
+    layout: &HashMap<(i32, i32), char>,
+    max_x: i32,
+    max_y: i32,
+) -> HashMap<(i32, i32), char> {
     let mut new_state = layout.clone();
 
     for y in 0..max_y {
         for x in 0..max_x {
             if *layout.get(&(x, y)).unwrap() == '.' {
-                continue
+                continue;
             }
             let occupied_count = get_neighbour_counts_p2(layout, x, y);
             let ch = layout.get(&(x, y)).unwrap();
@@ -121,18 +129,21 @@ fn main() {
         let next_state = change_state(&layout, max_x, max_y);
         if next_state == layout {
             layout = next_state;
-            break
+            break;
         } else {
             layout = next_state;
         }
     }
 
-    println!("{}", layout.iter().fold(0, |sum, (_, ch)| {
-        if *ch == '#' {
-            return sum + 1;
-        }
-        sum
-    }));
+    println!(
+        "{}",
+        layout.iter().fold(0, |sum, (_, ch)| {
+            if *ch == '#' {
+                return sum + 1;
+            }
+            sum
+        })
+    );
 
     let (mut layout, max_x, max_y) = get_initial_state(&text);
 
@@ -140,18 +151,21 @@ fn main() {
         let next_state = change_state_p2(&layout, max_x, max_y);
         if next_state == layout {
             layout = next_state;
-            break
+            break;
         } else {
             layout = next_state;
         }
     }
 
-    println!("{}", layout.iter().fold(0, |sum, (_, ch)| {
-        if *ch == '#' {
-            return sum + 1;
-        }
-        sum
-    }));
+    println!(
+        "{}",
+        layout.iter().fold(0, |sum, (_, ch)| {
+            if *ch == '#' {
+                return sum + 1;
+            }
+            sum
+        })
+    );
 }
 
 #[cfg(test)]
