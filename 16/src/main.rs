@@ -1,5 +1,7 @@
-use read_input::read_text;
+use std::cmp;
 use std::collections::{HashMap, HashSet};
+
+use read_input::read_text;
 
 #[derive(PartialEq)]
 enum ScanMode {
@@ -50,6 +52,7 @@ fn main() {
     let mut fields = Vec::new();
     let mut my_ticket: Vec<usize> = Vec::new();
     let mut other_tickets: Vec<Vec<usize>> = Vec::new();
+    let mut largest_field_name_size = 0;
 
     for line in text.lines() {
         if line == "" {
@@ -76,6 +79,7 @@ fn main() {
                         })
                         .collect();
 
+                    largest_field_name_size = cmp::max(largest_field_name_size, name.len());
                     fields.push(Field {
                         name: name.to_string(),
                         validations: ranges,
@@ -100,8 +104,8 @@ fn main() {
 
     println!("{}", invalid_field_count);
 
-    let mut field_mappings: HashMap<String, Vec<usize>> = HashMap::new();
-    let mut field_index_to_use = HashMap::new();
+    let mut field_mappings: HashMap<String, HashSet<usize>> = HashMap::new();
+    // let mut field_index_to_use = HashMap::new();
     // go through each field on the ticket left to right
     for ticket_field_i in 0..other_tickets[0].len() {
         // go through each field definition, likely not in the same order as the ticket
@@ -125,54 +129,27 @@ fn main() {
                     field_mappings
                         .get_mut(&field.name)
                         .unwrap()
-                        .push(ticket_field_i);
+                        .insert(ticket_field_i);
                 } else {
-                    field_mappings.insert(field.name.clone(), vec![ticket_field_i]);
+                    let mut set = HashSet::new();
+                    set.insert(ticket_field_i);
+                    field_mappings.insert(field.name.clone(), set);
                 }
             }
 
-            field_index_to_use.insert(field.name.clone(), 0);
+            // field_index_to_use.insert(field.name.clone(), 0);
         }
     }
 
-    let field_indexes_to_use_names: Vec<String> = field_index_to_use.keys().cloned().collect();
-
-    loop {
-        let mut p2_value = 1;
-        let mut used_indexes = HashSet::new();
-        for field in &field_indexes_to_use_names {
-            let field_index = field_index_to_use.get(field).unwrap();
-            let ticket_indexes = field_mappings.get(field).unwrap();
-            let ticket_i = ticket_indexes[*field_index];
-            if !used_indexes.contains(&ticket_i) {
-                used_indexes.insert(ticket_i);
-                if field.contains("departure") {
-                    p2_value *= my_ticket[ticket_i];
-                }
-            }
-        }
-
-        if used_indexes.len() == my_ticket.len() {
-            println!("{}", p2_value);
-            break;
-        }
-
-        let mut found_break = false;
-        for field in &field_indexes_to_use_names {
-            let field_index = field_index_to_use.get_mut(field).unwrap();
-            let ticket_indexes = field_mappings.get(field).unwrap();
-            if *field_index < ticket_indexes.len() - 1 {
-                *field_index += 1;
-                found_break = true;
-                // exit loop once we found the one to increase
-                break;
+    for (field, valid_tickets) in &field_mappings {
+        print!("{}{}", field, " ");
+        for i in 0..20 {
+            if valid_tickets.contains(&i) {
+                print!(" Y");
             } else {
-                *field_index = 0;
+                print!(" N");
             }
         }
-
-        if !found_break {
-            panic!("Cannot proceed");
-        }
+        println!("");
     }
 }
