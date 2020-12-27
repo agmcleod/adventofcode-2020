@@ -100,15 +100,12 @@ fn main() {
 
     println!("{}", invalid_field_count);
 
-    let mut field_mappings: HashMap<String, usize> = HashMap::new();
+    let mut field_mappings: HashMap<String, Vec<usize>> = HashMap::new();
+    let mut field_index_to_use = HashMap::new();
     // go through each field on the ticket left to right
     for ticket_field_i in 0..other_tickets[0].len() {
         // go through each field definition, likely not in the same order as the ticket
         for field in &fields {
-            // if we've grabbed this field already, skip it
-            if field_mappings.contains_key(&field.name) {
-                continue;
-            }
             let mut is_field_valid = true;
             // go through each ticket
             for (ticket_i, ticket) in other_tickets.iter().enumerate() {
@@ -124,20 +121,58 @@ fn main() {
             }
 
             if is_field_valid {
-                field_mappings.insert(field.name.clone(), ticket_field_i);
-                break;
+                if field_mappings.contains_key(&field.name) {
+                    field_mappings
+                        .get_mut(&field.name)
+                        .unwrap()
+                        .push(ticket_field_i);
+                } else {
+                    field_mappings.insert(field.name.clone(), vec![ticket_field_i]);
+                }
+            }
+
+            field_index_to_use.insert(field.name.clone(), 0);
+        }
+    }
+
+    let field_indexes_to_use_names: Vec<String> = field_index_to_use.keys().cloned().collect();
+
+    loop {
+        let mut p2_value = 1;
+        let mut used_indexes = HashSet::new();
+        for field in &field_indexes_to_use_names {
+            let field_index = field_index_to_use.get(field).unwrap();
+            let ticket_indexes = field_mappings.get(field).unwrap();
+            let ticket_i = ticket_indexes[*field_index];
+            if !used_indexes.contains(&ticket_i) {
+                used_indexes.insert(ticket_i);
+                if field.contains("departure") {
+                    p2_value *= my_ticket[ticket_i];
+                }
             }
         }
-    }
 
-    println!("{} {:?}", field_mappings.len(), field_mappings);
+        if used_indexes.len() == my_ticket.len() {
+            println!("{}", p2_value);
+            break;
+        }
 
-    let mut p2_value = 1;
-    for (field_name, index) in &field_mappings {
-        if field_name.contains("departure") {
-            println!("{} {} {}", field_name, index, my_ticket[*index]);
-            p2_value *= my_ticket[*index];
+        let mut found_break = false;
+        for field in &field_indexes_to_use_names {
+            let field_index = field_index_to_use.get_mut(field).unwrap();
+            let ticket_indexes = field_mappings.get(field).unwrap();
+            if *field_index < ticket_indexes.len() - 1 {
+                *field_index += 1;
+                found_break = true;
+                // exit loop once we found the one to increase
+                break;
+            } else {
+                *field_index = 0;
+            }
+        }
+
+        if !found_break {
+            panic!("Cannot proceed");
         }
     }
-    println!("{}", p2_value);
 }
