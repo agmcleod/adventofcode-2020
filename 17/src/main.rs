@@ -28,12 +28,6 @@ fn update_state_for_coord(
                 let neighbour = (coord.0 + x, coord.1 + y, coord.2 + z);
                 if let Some(state) = coords.get(&neighbour) {
                     if *state == '#' {
-                        next_x_range.0 = cmp::min(next_x_range.0, coord.0 + x - 1);
-                        next_x_range.1 = cmp::max(next_x_range.1, coord.0 + x + 1);
-                        next_y_range.0 = cmp::min(next_y_range.0, coord.1 + y - 1);
-                        next_y_range.1 = cmp::max(next_y_range.1, coord.1 + y + 1);
-                        next_z_range.0 = cmp::min(next_z_range.0, coord.2 + z - 1);
-                        next_z_range.1 = cmp::max(next_z_range.1, coord.2 + z + 1);
                         active_count += 1;
                     }
                 } else {
@@ -46,6 +40,12 @@ fn update_state_for_coord(
     if (*current_state == '#' && (active_count == 2 || active_count == 3))
         || (*current_state == '.' && active_count == 3)
     {
+        next_x_range.0 = cmp::min(next_x_range.0, coord.0 - 1);
+        next_x_range.1 = cmp::max(next_x_range.1, coord.0 + 1);
+        next_y_range.0 = cmp::min(next_y_range.0, coord.1 - 1);
+        next_y_range.1 = cmp::max(next_y_range.1, coord.1 + 1);
+        next_z_range.0 = cmp::min(next_z_range.0, coord.2 - 1);
+        next_z_range.1 = cmp::max(next_z_range.1, coord.2 + 1);
         next_coords.insert(coord.clone(), '#');
     } else {
         next_coords.insert(coord.clone(), '.');
@@ -81,7 +81,7 @@ fn main() {
 
     let (mut coords, mut x_range, mut y_range, mut z_range) = get_coords_from_input(&input);
 
-    for _ in 0..6 {
+    for step in 0..6 {
         let mut next_state = HashMap::new();
         let mut next_x_range = x_range.clone();
         let mut next_y_range = y_range.clone();
