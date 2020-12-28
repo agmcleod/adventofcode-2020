@@ -5,6 +5,41 @@ use read_input::read_text;
 
 type Coord = (i32, i32, i32, i32);
 
+fn find_active_count(
+    coords: &HashMap<Coord, char>,
+    coord: &Coord,
+    axis_count: i32,
+    current_axis: i32,
+    inputs: Vec<i32>,
+) -> i32 {
+    let mut active_count = 0;
+    if current_axis >= axis_count {
+        let mut input_iter = inputs.iter();
+        let x = input_iter.next().unwrap();
+        let y = input_iter.next().unwrap();
+        let z = input_iter.next().unwrap();
+        let w = input_iter.next().unwrap_or(&0);
+        if *x == 0 && *y == 0 && *z == 0 && *w == 0 {
+            return active_count;
+        }
+        let neighbour = (coord.0 + *x, coord.1 + *y, coord.2 + *z, coord.3 + *w);
+        if let Some(state) = coords.get(&neighbour) {
+            if *state == '#' {
+                active_count += 1;
+            }
+        }
+
+        return active_count;
+    }
+    for axis_value in -1..=1 {
+        let mut inputs = inputs.clone();
+        inputs.push(axis_value);
+        active_count += find_active_count(coords, coord, axis_count, current_axis + 1, inputs);
+    }
+
+    active_count
+}
+
 fn update_state_for_coord(
     coords: &mut HashMap<Coord, char>,
     next_coords: &mut HashMap<Coord, char>,
@@ -15,25 +50,7 @@ fn update_state_for_coord(
         coords.insert(coord.clone(), '.');
     }
     let current_state = coords.get(coord).unwrap();
-    let mut active_count = 0;
-    for x in -1..=1 {
-        for y in -1..=1 {
-            for z in -1..=1 {
-                if x == 0 && y == 0 && z == 0 {
-                    continue;
-                }
-
-                let neighbour = (coord.0 + x, coord.1 + y, coord.2 + z, 0);
-                if let Some(state) = coords.get(&neighbour) {
-                    if *state == '#' {
-                        active_count += 1;
-                    }
-                } else {
-                    next_coords.insert(neighbour, '.');
-                }
-            }
-        }
-    }
+    let active_count = find_active_count(coords, coord, next_ranges.len() as i32, 0, Vec::new());
 
     if (*current_state == '#' && (active_count == 2 || active_count == 3))
         || (*current_state == '.' && active_count == 3)
