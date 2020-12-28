@@ -21,6 +21,7 @@ name = "eighteen"
 version = "0.1.0"
 dependencies = [
  "read_input",
+ "regex",
 ]
 
 [[package]]

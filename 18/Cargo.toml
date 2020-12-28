@@ -8,3 +8,4 @@ edition = "2018"
 
 [dependencies]
 read_input = { path = "../read_input/" }
+regex = "1.4.2"
