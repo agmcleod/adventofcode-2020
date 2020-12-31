@@ -76,4 +76,9 @@ fn main() {
             y += 1;
         }
     }
+
+    // tile id, Vec<(tile id, side)>
+    let mut tile_connections: HashMap<String, Vec<(String, String)>> = HashMap::new();
+    let mut work = vec![tiles[0].id.clone()];
+    loop {}
 }
