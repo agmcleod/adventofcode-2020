@@ -1,8 +1,10 @@
-use std::collections::HashMap;
+use std::cmp::{Eq, Ord, Ordering, PartialEq, PartialOrd};
+use std::collections::{BinaryHeap, HashMap, HashSet};
 use std::fmt::Debug;
 
 use read_input::read_text;
 
+#[derive(Clone)]
 struct Tile {
     id: String,
     edges: Vec<String>,
@@ -25,6 +27,57 @@ impl Debug for Tile {
                 .join("\n"),
             self.edges.join("\n")
         )
+    }
+}
+
+struct Connection {
+    tile_id: String,
+    side: String,
+}
+
+struct Work {
+    level: usize,
+    tile_id: String,
+    tiles: Vec<Tile>,
+    scanned_tiles: HashSet<String>,
+    tile_connections: HashMap<String, Vec<Connection>>,
+}
+
+impl Work {
+    fn new(
+        level: usize,
+        tile_id: String,
+        tiles: Vec<Tile>,
+        scanned_tiles: HashSet<String>,
+        tile_connections: HashMap<String, Vec<Connection>>,
+    ) -> Self {
+        Work {
+            level,
+            tile_id,
+            tiles,
+            scanned_tiles,
+            tile_connections,
+        }
+    }
+}
+
+impl Ord for Work {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.level.cmp(&other.level)
+    }
+}
+
+impl PartialOrd for Work {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl Eq for Work {}
+
+impl PartialEq for Work {
+    fn eq(&self, other: &Self) -> bool {
+        self.level == other.level
     }
 }
 
@@ -77,8 +130,27 @@ fn main() {
         }
     }
 
-    // tile id, Vec<(tile id, side)>
-    let mut tile_connections: HashMap<String, Vec<(String, String)>> = HashMap::new();
-    let mut work = vec![tiles[0].id.clone()];
-    loop {}
+    let mut work_heap = BinaryHeap::new();
+    work_heap.push(Work::new(
+        0,
+        tiles[0].id.clone(),
+        tiles.clone(),
+        HashSet::new(),
+        HashMap::new(),
+    ));
+    loop {
+        let next_work = work_heap.pop();
+
+        if next_work.is_none() {
+            break;
+        }
+
+        let work = next_work.unwrap();
+
+        for tile in &tiles {
+            if work.scanned_tiles.contains(&tile.id) {
+                continue;
+            }
+        }
+    }
 }
