@@ -63,6 +63,57 @@ fn tile_aligns_on_top(tile_one: &Tile, tile_two: &Tile) -> bool {
     tile_one.data[9] == tile_two.data[0]
 }
 
+fn full_image_has_obstacle(full_image: &Vec<Vec<String>>, pos: &(usize, usize)) -> bool {
+    if full_image.len() > pos.1 {
+        if full_image[pos.1].len() > pos.0 {
+            return &full_image[pos.1][pos.0] == "#";
+        }
+    }
+
+    false
+}
+
+fn find_sea_monsters(full_image: &Vec<Vec<String>>) -> usize {
+    let mut count = 0;
+
+    let min_x: usize = 19;
+    let max_y = full_image.len() - 2;
+    let mut pos = (min_x, 1);
+
+    loop {
+        if full_image_has_obstacle(full_image, &pos)
+            && full_image_has_obstacle(full_image, &(pos.0 - 1, pos.1 - 1))
+            && full_image_has_obstacle(full_image, &(pos.0 - 1, pos.1))
+            && full_image_has_obstacle(full_image, &(pos.0 - 2, pos.1))
+            && full_image_has_obstacle(full_image, &(pos.0 - 3, pos.1 + 1))
+            && full_image_has_obstacle(full_image, &(pos.0 - 6, pos.1 + 1))
+            && full_image_has_obstacle(full_image, &(pos.0 - 7, pos.1))
+            && full_image_has_obstacle(full_image, &(pos.0 - 8, pos.1))
+            && full_image_has_obstacle(full_image, &(pos.0 - 9, pos.1 + 1))
+            && full_image_has_obstacle(full_image, &(pos.0 - 12, pos.1 + 1))
+            && full_image_has_obstacle(full_image, &(pos.0 - 13, pos.1))
+            && full_image_has_obstacle(full_image, &(pos.0 - 14, pos.1))
+            && full_image_has_obstacle(full_image, &(pos.0 - 15, pos.1 + 1))
+            && full_image_has_obstacle(full_image, &(pos.0 - 18, pos.1 + 1))
+            && full_image_has_obstacle(full_image, &(pos.0 - 19, pos.1))
+        {
+            count += 1;
+        }
+
+        pos.0 += 1;
+
+        if pos.0 >= full_image.len() {
+            pos.0 = min_x;
+            pos.1 += 1;
+            if pos.1 > max_y {
+                break;
+            }
+        }
+    }
+
+    count
+}
+
 fn try_next_tile(
     grid_size: i32,
     tiles: &Vec<Tile>,
@@ -161,6 +212,9 @@ fn main() {
     }
 
     let grid_size = (tiles.len() as f32).sqrt().round() as i32;
+    let tile_size = tiles.first().unwrap().data.len();
+    let full_image_cell_size = grid_size as usize * tile_size;
+    let mut full_image: Vec<Vec<String>> = Vec::with_capacity(full_image_cell_size);
     for tile in &tiles {
         let res = try_next_tile(
             grid_size,
@@ -181,7 +235,54 @@ fn main() {
                     * layout.get(&(0, grid_size_idx)).unwrap().id
                     * layout.get(&(grid_size_idx, grid_size_idx)).unwrap().id
             );
+
+            for y in 0..grid_size {
+                for x in 0..grid_size {
+                    let tile = layout.get(&(x, y)).unwrap();
+                    // println!("{},{} {:?}", x, y, tile);
+                    for (ty, row) in tile.data[1..tile_size - 1].iter().enumerate() {
+                        for col in &row[1..tile_size - 1] {
+                            let target_row = y as usize * (tile_size - 2) as usize + ty;
+                            if full_image.get(target_row).is_none() {
+                                full_image.push(Vec::with_capacity(full_image_cell_size));
+                            }
+                            full_image[target_row].push(col.to_owned());
+                        }
+                    }
+                }
+            }
+
             break;
+        }
+    }
+
+    // for row in &full_image {
+    //     for col in row {
+    //         print!("{}", col);
+    //     }
+    //     print!("\n");
+    // }
+
+    for n in 0..8 {
+        let count = find_sea_monsters(&full_image);
+        if count > 0 {
+            println!("monsters {}", count);
+            println!(
+                "Other cells {}",
+                full_image.iter().fold(0, |sum, row| {
+                    sum + row.iter().fold(0, |sum, col| {
+                        if col == "#" {
+                            return sum + 1;
+                        }
+                        return sum;
+                    })
+                }) - count * 15
+            );
+        }
+
+        rotate_tile_data_by_90(&mut full_image);
+        if n == 3 {
+            flip_tile_data(&mut full_image);
         }
     }
 }
