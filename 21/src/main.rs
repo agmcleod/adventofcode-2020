@@ -35,6 +35,7 @@ fn main() -> Result<()> {
     }
 
     let mut no_allergen_ingredients = Vec::new();
+    let mut ingredients_mapped = HashSet::new();
 
     for (i, line) in list.iter().enumerate() {
         // might be able to do log(n) instead of o(n)^2 here
