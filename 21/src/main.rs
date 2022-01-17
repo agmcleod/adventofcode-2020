@@ -41,6 +41,8 @@ fn main() -> Result<()> {
             }
         }
 
+        // TODO: need to update this to check for exclusions.
+        // If we encounter a line again for the same single allergen, both lines must include the ingredient
         if allergens.len() == 1 {
             let allergen_key = allergens.get(0).unwrap();
             if singular_allergens.contains_key(allergen_key) {
@@ -77,13 +79,11 @@ fn main() -> Result<()> {
     for (allergen, allergen_ingredients) in &allergens_map {
         // get the list of ingredients where one of these MUST include the allergen
         let required_ingredients = singular_allergens.get(allergen).unwrap();
+        let mut allergen_count_in_lines = 0;
         for line in &list {
             // if the line includes the current allergen
             if line.1.contains(allergen) {
-                // if allergen list is 1, we can skip
-                if line.1.len() == 1 {
-                    continue;
-                }
+                allergen_count_in_lines += 1;
 
                 // check if the ingredients align with the required ones
                 for ingredient in &line.0 {
