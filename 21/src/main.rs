@@ -41,15 +41,18 @@ fn main() -> Result<()> {
             }
         }
 
-        // TODO: need to update this to check for exclusions.
-        // If we encounter a line again for the same single allergen, both lines must include the ingredient
         if allergens.len() == 1 {
             let allergen_key = allergens.get(0).unwrap();
             if singular_allergens.contains_key(allergen_key) {
-                let set: &mut HashSet<String> = singular_allergens.get_mut(allergen_key).unwrap();
-                for ing in &ingredients {
-                    set.insert(ing.clone());
+                let set = singular_allergens.get(allergen_key).unwrap();
+                let mut new_set = HashSet::new();
+                // go through existing set, keep if both lines have it
+                for ing in set {
+                    if ingredients.contains(ing) {
+                        new_set.insert(ing.to_owned());
+                    }
                 }
+                singular_allergens.insert(allergen_key.to_owned(), new_set);
             } else {
                 let mut set = HashSet::new();
                 for ing in &ingredients {
@@ -79,12 +82,9 @@ fn main() -> Result<()> {
     for (allergen, allergen_ingredients) in &allergens_map {
         // get the list of ingredients where one of these MUST include the allergen
         let required_ingredients = singular_allergens.get(allergen).unwrap();
-        let mut allergen_count_in_lines = 0;
         for line in &list {
             // if the line includes the current allergen
             if line.1.contains(allergen) {
-                allergen_count_in_lines += 1;
-
                 // check if the ingredients align with the required ones
                 for ingredient in &line.0 {
                     if !required_ingredients.contains(ingredient) {
@@ -105,7 +105,7 @@ fn main() -> Result<()> {
             if ingredients_map.get(ing).unwrap().contains(allergen) {
                 allergen_usage_count += 1;
                 // store the ingredient key so we can clear out other allergens after
-                // will ovewrite in loop, but if count is > 1, doesn't matter anyways
+                // This will ovewrite in loop, but if count is > 1, we ignore it anyways
                 ingredient_holding_allergen = ing.clone();
             }
         }
