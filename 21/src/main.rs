@@ -88,7 +88,7 @@ fn main() -> Result<()> {
                 // check if the ingredients align with the required ones
                 for ingredient in &line.0 {
                     if !required_ingredients.contains(ingredient) {
-                        // cannot contain the current allergen
+                        // The ingredient of this line cannot contain the current allergen
                         ingredients_map
                             .get_mut(ingredient)
                             .unwrap()
@@ -109,6 +109,8 @@ fn main() -> Result<()> {
                 ingredient_holding_allergen = ing.clone();
             }
         }
+
+        // TODO: somehow need to determine how to clean up the singular allergen line of non-possible canidates.
 
         // if count is 1, remove any other allergens from that ingredient
         if allergen_usage_count == 1 {
