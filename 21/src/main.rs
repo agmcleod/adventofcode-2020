@@ -6,7 +6,7 @@ use read_input::read_text;
 fn main() -> Result<()> {
     let text = read_text("21/input.txt")?;
 
-    let mut singular_allergens = HashMap::new();
+    // let mut singular_allergens = HashMap::new();
     let mut ingredients_map = HashMap::new();
     let mut allergens_map = HashMap::new();
 
@@ -54,32 +54,33 @@ fn main() -> Result<()> {
 
         // if it's a singular allergen for the line of ingredients, we want to add it to a set
         // this is a source of truth for what ingredients must be allocated to a specific allergen
-        if allergens.len() == 1 {
-            let allergen_key = allergens.get(0).unwrap();
-            if singular_allergens.contains_key(allergen_key) {
-                let set = singular_allergens.get(allergen_key).unwrap();
-                let mut new_set = HashSet::new();
-                // go through existing set, keep if both lines have it
-                for ing in set {
-                    if ingredients.contains(ing) {
-                        new_set.insert(ing.to_owned());
-                    }
-                }
-                singular_allergens.insert(allergen_key.to_owned(), new_set);
-            } else {
-                let mut set = HashSet::new();
-                for ing in &ingredients {
-                    set.insert(ing.clone());
-                }
-                singular_allergens.insert(allergen_key.to_owned(), set);
-            }
-        }
+        // if allergens.len() == 1 {
+        //     let allergen_key = allergens.get(0).unwrap();
+        //     if singular_allergens.contains_key(allergen_key) {
+        //         let set = singular_allergens.get(allergen_key).unwrap();
+        //         let mut new_set = HashSet::new();
+        //         // go through existing set, keep if both lines have it
+        //         for ing in set {
+        //             if ingredients.contains(ing) {
+        //                 new_set.insert(ing.to_owned());
+        //             }
+        //         }
+        //         singular_allergens.insert(allergen_key.to_owned(), new_set);
+        //     } else {
+        //         let mut set = HashSet::new();
+        //         for ing in &ingredients {
+        //             set.insert(ing.clone());
+        //         }
+        //         singular_allergens.insert(allergen_key.to_owned(), set);
+        //     }
+        // }
 
         list.push((ingredients, allergens));
     }
 
     // go through each allergen to figure out its potential owners
     for (allergen, allergen_ingredients) in &allergens_map {
+        // TODO: need to rework this to check if an ingredient is in all recipes for a given allergen.
         // get the list of ingredients where one of these MUST include the allergen
         let required_ingredients = singular_allergens.get(allergen).unwrap();
         for line in &list {
@@ -109,8 +110,6 @@ fn main() -> Result<()> {
                 ingredient_holding_allergen = ing.clone();
             }
         }
-
-        // TODO: somehow need to determine how to clean up the singular allergen line of non-possible canidates.
 
         // if count is 1, remove any other allergens from that ingredient
         if allergen_usage_count == 1 {
