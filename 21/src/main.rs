@@ -29,6 +29,7 @@ fn main() -> Result<()> {
             .map(|v| v.to_string())
             .collect::<Vec<String>>();
 
+        // map ingredients to each allergen, so we can grab all ingredients by allergen.
         for allergen in &allergens {
             let map = if allergens_map.contains_key(allergen) {
                 allergens_map.get_mut(allergen).unwrap()
@@ -38,9 +39,21 @@ fn main() -> Result<()> {
             };
             for ing in &ingredients {
                 map.insert(ing.to_owned());
+
+                // also map the opposite direction of an ingredient to possible allergens
+                let map = if ingredients_map.contains_key(ing) {
+                    ingredients_map.get_mut(ing).unwrap()
+                } else {
+                    ingredients_map.insert(ing.to_owned(), HashSet::new());
+                    ingredients_map.get_mut(ing).unwrap()
+                };
+
+                map.insert(allergen.to_owned());
             }
         }
 
+        // if it's a singular allergen for the line of ingredients, we want to add it to a set
+        // this is a source of truth for what ingredients must be allocated to a specific allergen
         if allergens.len() == 1 {
             let allergen_key = allergens.get(0).unwrap();
             if singular_allergens.contains_key(allergen_key) {
@@ -59,19 +72,6 @@ fn main() -> Result<()> {
                     set.insert(ing.clone());
                 }
                 singular_allergens.insert(allergen_key.to_owned(), set);
-            }
-        }
-
-        for ing in &ingredients {
-            for allergen in &allergens {
-                let map = if ingredients_map.contains_key(ing) {
-                    ingredients_map.get_mut(ing).unwrap()
-                } else {
-                    ingredients_map.insert(ing.to_owned(), HashSet::new());
-                    ingredients_map.get_mut(ing).unwrap()
-                };
-
-                map.insert(allergen.to_owned());
             }
         }
 
