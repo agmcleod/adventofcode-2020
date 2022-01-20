@@ -81,46 +81,54 @@ fn main() -> Result<()> {
     // go through each allergen to figure out its potential owners
     for (allergen, allergen_ingredients) in &allergens_map {
         // TODO: need to rework this to check if an ingredient is in all recipes for a given allergen.
-        // get the list of ingredients where one of these MUST include the allergen
-        let required_ingredients = singular_allergens.get(allergen).unwrap();
+        let mut possible_ingredients = HashSet::new();
         for line in &list {
             // if the line includes the current allergen
             if line.1.contains(allergen) {
-                // check if the ingredients align with the required ones
+                let mut next_set_possible_ingredients = HashSet::new();
                 for ingredient in &line.0 {
-                    if !required_ingredients.contains(ingredient) {
-                        // The ingredient of this line cannot contain the current allergen
-                        ingredients_map
-                            .get_mut(ingredient)
-                            .unwrap()
-                            .remove(allergen);
+                    // have yet to populate the hash set, so just do inserts
+                    if possible_ingredients.len() == 0 {
+                        next_set_possible_ingredients.insert(ingredient.to_owned());
+                    } else {
+                        // update the hashset to only have ones that are consistent.
+                        if possible_ingredients.contains(ingredient) {
+                            next_set_possible_ingredients.insert(ingredient.to_owned());
+                        }
                     }
                 }
+
+                possible_ingredients = next_set_possible_ingredients;
             }
         }
 
-        // see how many ingredients are using this allergen now
-        let mut allergen_usage_count = 0;
-        let mut ingredient_holding_allergen = String::new();
-        for ing in allergen_ingredients {
-            if ingredients_map.get(ing).unwrap().contains(allergen) {
-                allergen_usage_count += 1;
-                // store the ingredient key so we can clear out other allergens after
-                // This will ovewrite in loop, but if count is > 1, we ignore it anyways
-                ingredient_holding_allergen = ing.clone();
+        // go through each ingredient of the allergen, and remove it from the map if its not in our possible hash set
+        for ingredient in allergen_ingredients {
+            if !possible_ingredients.contains(ingredient) {
+                ingredients_map
+                    .get_mut(ingredient)
+                    .unwrap()
+                    .remove(allergen);
             }
-        }
-
-        // if count is 1, remove any other allergens from that ingredient
-        if allergen_usage_count == 1 {
-            let mut new_set = HashSet::new();
-            new_set.insert(allergen.to_owned());
-            // replace the set with one just holding the single allergen
-            ingredients_map.insert(ingredient_holding_allergen, new_set);
         }
     }
 
-    println!("{:?}", ingredients_map);
+    let allergen_free_ingredients = ingredients_map
+        .iter()
+        .filter(|(_ing, allergen)| allergen.len() == 0)
+        .map(|(ing, _allergen)| ing)
+        .collect::<Vec<&String>>();
+
+    let mut counter = 0;
+    for line in &list {
+        for ing in &allergen_free_ingredients {
+            if line.0.contains(ing) {
+                counter += 1;
+            }
+        }
+    }
+
+    println!("{}", counter);
 
     Ok(())
 }
