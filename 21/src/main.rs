@@ -3,6 +3,10 @@ use std::io::Result;
 
 use read_input::read_text;
 
+fn get_first_value_from_hashset(set: &HashSet<String>) -> String {
+    set.iter().collect::<Vec<&String>>()[0].clone()
+}
+
 fn main() -> Result<()> {
     let text = read_text("21/input.txt")?;
 
@@ -51,29 +55,6 @@ fn main() -> Result<()> {
                 map.insert(allergen.to_owned());
             }
         }
-
-        // if it's a singular allergen for the line of ingredients, we want to add it to a set
-        // this is a source of truth for what ingredients must be allocated to a specific allergen
-        // if allergens.len() == 1 {
-        //     let allergen_key = allergens.get(0).unwrap();
-        //     if singular_allergens.contains_key(allergen_key) {
-        //         let set = singular_allergens.get(allergen_key).unwrap();
-        //         let mut new_set = HashSet::new();
-        //         // go through existing set, keep if both lines have it
-        //         for ing in set {
-        //             if ingredients.contains(ing) {
-        //                 new_set.insert(ing.to_owned());
-        //             }
-        //         }
-        //         singular_allergens.insert(allergen_key.to_owned(), new_set);
-        //     } else {
-        //         let mut set = HashSet::new();
-        //         for ing in &ingredients {
-        //             set.insert(ing.clone());
-        //         }
-        //         singular_allergens.insert(allergen_key.to_owned(), set);
-        //     }
-        // }
 
         list.push((ingredients, allergens));
     }
@@ -128,7 +109,55 @@ fn main() -> Result<()> {
         }
     }
 
-    println!("{}", counter);
+    // create a map of just the allergen ingredients
+    let mut allergen_ingredients = HashMap::new();
+    for (ing, allergens) in &ingredients_map {
+        if allergens.len() > 0 {
+            allergen_ingredients.insert(ing.to_owned(), allergens.clone());
+        }
+    }
+
+    // keep track of what allergens we processed in p2 answer
+    let mut processed_allergens = HashSet::new();
+    loop {
+        // get an allergen to remove from lists when it has a length of 1 and we havent processed it yet
+        let allergen_to_process = allergen_ingredients.iter().find(|(_ing, allergens)| {
+            allergens.len() == 1
+                && !processed_allergens.contains(&get_first_value_from_hashset(allergens))
+        });
+
+        if allergen_to_process.is_none() {
+            break;
+        }
+
+        let allergen = allergen_to_process
+            .unwrap()
+            .1
+            .iter()
+            .collect::<Vec<&String>>()[0]
+            .clone();
+        for (_ing, allergens) in &mut allergen_ingredients {
+            if allergens.len() > 1 {
+                allergens.remove(&allergen);
+            }
+        }
+
+        processed_allergens.insert(allergen.to_owned());
+    }
+
+    let mut final_list = allergen_ingredients
+        .iter()
+        .map(|(ing, allergens)| (ing.to_owned(), get_first_value_from_hashset(allergens)))
+        .collect::<Vec<(String, String)>>();
+
+    final_list.sort_by(|a, b| a.1.cmp(&b.1));
+
+    let final_list = final_list
+        .iter()
+        .map(|(ing, _)| ing.to_owned())
+        .collect::<Vec<String>>();
+
+    println!("{:?}", final_list.join(","));
 
     Ok(())
 }
