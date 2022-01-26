@@ -21,13 +21,12 @@ fn get_destination(input: &LinkedList<u32>, current_cup: u32, highest_cup: u32) 
     destination
 }
 
-fn take_turn(input: &mut LinkedList<u32>, current_cup: &mut u32, highest_cup: u32) {
+fn take_turn(input: &mut LinkedList<u32>, current_cup_index: &mut usize, highest_cup: u32) {
     let mut picked_up = LinkedList::new();
     // pick up the next 3 cups, remove them from the input
-    let current_cup_index = input.iter().position(|v| *v == *current_cup).unwrap();
-    let mut split = input.split_off(current_cup_index + 1);
-    // let n = split.pop_front().unwrap();
-    // input.push_back(n);
+    // let debug_list = input.clone();
+    let mut split = input.split_off(*current_cup_index + 1);
+    let current_cup = input.back().unwrap().to_owned();
     for _ in 0..3 {
         let value = split.pop_front();
         if value.is_some() {
@@ -42,24 +41,25 @@ fn take_turn(input: &mut LinkedList<u32>, current_cup: &mut u32, highest_cup: u3
     input.append(&mut split);
 
     // find the destination
-    let destination = get_destination(&input, *current_cup, highest_cup);
+    let destination = get_destination(&input, current_cup, highest_cup);
     let mut split = input.split_off(destination + 1);
+    // let debug_picked_up = picked_up.clone();
     input.append(&mut picked_up);
     input.append(&mut split);
 
-    // iterate until we find the current cup
-    let mut iter = input.iter();
-    while let Some(v) = iter.next() {
-        if *v == *current_cup {
-            break;
-        }
-    }
-    // get the one after the curent cup
-    if let Some(v) = iter.next() {
-        *current_cup = *v;
+    // println!(
+    //     "current {} list {:?}\npicked up: {:?}\ndest idx: {}\n",
+    //     current_cup, debug_list, debug_picked_up, destination
+    // );
+
+    if destination < *current_cup_index {
+        *current_cup_index += 4;
     } else {
-        // if it didn't exist, get the first one
-        *current_cup = input.front().unwrap().to_owned();
+        *current_cup_index += 1;
+    }
+    if *current_cup_index >= input.len() {
+        // *current_cup_index -= input.len();
+        *current_cup_index = 0;
     }
 }
 
@@ -76,10 +76,10 @@ fn main() {
 
     let mut p2_input = input.clone();
 
-    let mut current_cup = input.front().unwrap().to_owned();
+    let mut current_cup_index = 0;
 
     for _ in 0..100 {
-        take_turn(&mut input, &mut current_cup, highest_cup);
+        take_turn(&mut input, &mut current_cup_index, highest_cup);
     }
 
     // create p1 answer
@@ -90,13 +90,14 @@ fn main() {
     let output: String = split.iter().map(|v| v.to_string()).collect();
     println!("{:?}", output);
 
+    // p2
     for n in highest_cup..=1_000_000 {
         p2_input.push_back(n);
     }
 
-    let mut current_cup = p2_input.front().unwrap().to_owned();
+    let mut current_cup_index = 0;
     for _ in 0..10_000_000 {
-        take_turn(&mut p2_input, &mut current_cup, 10_000_000);
+        take_turn(&mut p2_input, &mut current_cup_index, 10_000_000);
     }
 
     let start_index = p2_input.iter().position(|v| *v == 1).unwrap();
