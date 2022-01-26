@@ -1,4 +1,34 @@
-use std::collections::LinkedList;
+use std::collections::{HashMap, LinkedList};
+
+struct Cups {
+    data: HashMap<String, String>,
+}
+
+impl Cups {
+    fn new() -> Self {
+        Cups {
+            data: HashMap::new(),
+        }
+    }
+}
+
+struct CupsIterator<'a> {
+    cursor: &'a str,
+    data: &'a HashMap<String, String>,
+}
+
+impl<'a> Iterator for CupsIterator<'a> {
+    type Item = &'a String;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let result: Option<Self::Item> = self.data.get(self.cursor);
+        if let Some(v) = result {
+            self.cursor = v;
+        }
+
+        result
+    }
+}
 
 fn get_destination(input: &LinkedList<u32>, current_cup: u32, highest_cup: u32) -> usize {
     let mut incr = 1;
