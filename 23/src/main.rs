@@ -1,6 +1,6 @@
-use std::thread::current;
+use std::collections::LinkedList;
 
-fn get_destination(input: &Vec<u32>, current_cup: u32, highest_cup: u32) -> usize {
+fn get_destination(input: &LinkedList<u32>, current_cup: u32, highest_cup: u32) -> usize {
     let mut incr = 1;
     let mut destination = 0;
     let mut destination_cup = current_cup;
@@ -21,26 +21,46 @@ fn get_destination(input: &Vec<u32>, current_cup: u32, highest_cup: u32) -> usiz
     destination
 }
 
-fn take_turn(input: &mut Vec<u32>, current_cup: &mut u32, highest_cup: u32) {
-    let mut picked_up = Vec::with_capacity(3);
+fn take_turn(input: &mut LinkedList<u32>, current_cup: &mut u32, highest_cup: u32) {
+    let mut picked_up = LinkedList::new();
     // pick up the next 3 cups, remove them from the input
-    let debug_input = input.clone();
+    let current_cup_index = input.iter().position(|v| *v == *current_cup).unwrap();
+    let mut split = input.split_off(current_cup_index + 1);
+    // let n = split.pop_front().unwrap();
+    // input.push_back(n);
     for _ in 0..3 {
-        let current_cup_index = input.iter().position(|v| *v == *current_cup).unwrap();
-        let next = current_cup_index + 1;
-        let value = input.remove(next % input.len());
-        picked_up.push(value);
+        let value = split.pop_front();
+        if value.is_some() {
+            picked_up.push_back(value.unwrap());
+        } else {
+            // ran out of the split, so start pulling off the front of the list
+            picked_up.push_back(input.pop_front().unwrap());
+        }
     }
+
+    // add the split back
+    input.append(&mut split);
 
     // find the destination
     let destination = get_destination(&input, *current_cup, highest_cup);
+    let mut split = input.split_off(destination + 1);
+    input.append(&mut picked_up);
+    input.append(&mut split);
 
-    for (i, pickedup_cup) in picked_up.iter().enumerate() {
-        input.insert(destination + 1 + i, pickedup_cup.to_owned());
+    // iterate until we find the current cup
+    let mut iter = input.iter();
+    while let Some(v) = iter.next() {
+        if *v == *current_cup {
+            break;
+        }
     }
-
-    let current_cup_index = input.iter().position(|v| *v == *current_cup).unwrap();
-    *current_cup = input[(current_cup_index + 1) % input.len()];
+    // get the one after the curent cup
+    if let Some(v) = iter.next() {
+        *current_cup = *v;
+    } else {
+        // if it didn't exist, get the first one
+        *current_cup = input.front().unwrap().to_owned();
+    }
 }
 
 fn main() {
@@ -52,35 +72,36 @@ fn main() {
             highest_cup = highest_cup.max(n);
             n
         })
-        .collect::<Vec<u32>>();
+        .collect::<LinkedList<u32>>();
 
     let mut p2_input = input.clone();
 
-    let mut current_cup = input[0];
+    let mut current_cup = input.front().unwrap().to_owned();
 
     for _ in 0..100 {
         take_turn(&mut input, &mut current_cup, highest_cup);
     }
 
+    // create p1 answer
     let start_index = input.iter().position(|v| *v == 1).unwrap();
-    let mut output = Vec::with_capacity(input.len() - 1);
-    for n in 1..9 {
-        output.push(input[(start_index + n) % input.len()].to_string());
-    }
-    println!("{:?}", output.join(""));
+    let mut split = input.split_off(start_index);
+    split.pop_front();
+    split.append(&mut input);
+    let output: String = split.iter().map(|v| v.to_string()).collect();
+    println!("{:?}", output);
 
     for n in highest_cup..=1_000_000 {
-        p2_input.push(n);
+        p2_input.push_back(n);
     }
 
-    let mut current_cup = p2_input[0];
+    let mut current_cup = p2_input.front().unwrap().to_owned();
     for _ in 0..10_000_000 {
         take_turn(&mut p2_input, &mut current_cup, 10_000_000);
     }
 
     let start_index = p2_input.iter().position(|v| *v == 1).unwrap();
-    println!(
-        "{}",
-        p2_input[(start_index + 1) % p2_input.len()] * p2_input[(start_index + 2) % p2_input.len()]
-    );
+    let split = p2_input.split_off(start_index);
+    let mut iter = split.iter();
+    iter.next();
+    println!("{}", iter.next().unwrap() * iter.next().unwrap());
 }
