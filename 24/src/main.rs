@@ -70,10 +70,8 @@ fn take_turn(
     *s_range = next_s_range;
 }
 
-fn main() -> Result<()> {
-    let text = read_text("24/input.txt")?;
+fn get_initial_flipped_tiles(text: &String) -> (FlippedTiles, Range, Range, Range) {
     let mut flipped_tiles = HashSet::new();
-
     let mut q_range = (std::i32::MAX, 0);
     let mut r_range = (std::i32::MAX, 0);
     let mut s_range = (std::i32::MAX, 0);
@@ -146,6 +144,14 @@ fn main() -> Result<()> {
         }
     }
 
+    (flipped_tiles, q_range, r_range, s_range)
+}
+
+fn main() -> Result<()> {
+    let text = read_text("24/input.txt")?;
+
+    let (mut flipped_tiles, mut q_range, mut r_range, mut s_range) =
+        get_initial_flipped_tiles(&text);
     println!("{}", flipped_tiles.len());
 
     // p2
