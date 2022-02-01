@@ -11,20 +11,25 @@ fn get_flipped_neighbours(tiles: &FlippedTiles, pos: &(i32, i32, i32)) -> usize 
     // ne
     if tiles.contains(&(pos.0 + 1, pos.1 - 1, pos.2)) {
         count += 1;
+    }
     // nw
-    } else if tiles.contains(&(pos.0, pos.1 - 1, pos.2 + 1)) {
+    if tiles.contains(&(pos.0, pos.1 - 1, pos.2 + 1)) {
         count += 1;
+    }
     // se
-    } else if tiles.contains(&(pos.0, pos.1 + 1, pos.2 - 1)) {
+    if tiles.contains(&(pos.0, pos.1 + 1, pos.2 - 1)) {
         count += 1;
+    }
     // sw
-    } else if tiles.contains(&(pos.0 - 1, pos.1 + 1, pos.2)) {
+    if tiles.contains(&(pos.0 - 1, pos.1 + 1, pos.2)) {
         count += 1;
+    }
     // w
-    } else if tiles.contains(&(pos.0 - 1, pos.1, pos.2 + 1)) {
+    if tiles.contains(&(pos.0 - 1, pos.1, pos.2 + 1)) {
         count += 1;
+    }
     // e
-    } else if tiles.contains(&(pos.0 + 1, pos.1, pos.2 - 1)) {
+    if tiles.contains(&(pos.0 + 1, pos.1, pos.2 - 1)) {
         count += 1;
     }
 
@@ -48,10 +53,8 @@ fn take_turn(
                 let pos = (q, r, s);
                 let count = get_flipped_neighbours(tiles, &pos);
                 if tiles.contains(&pos) && (count == 0 || count > 2) {
-                    println!("flip to white {:?}", pos);
                     next_state.remove(&pos);
                 } else if !tiles.contains(&pos) && count == 2 {
-                    println!("flip to black {:?}", pos);
                     next_q_range.0 = next_q_range.0.min(q);
                     next_q_range.1 = next_q_range.1.max(q);
                     next_r_range.0 = next_r_range.0.min(r);
@@ -155,7 +158,7 @@ fn main() -> Result<()> {
     println!("{}", flipped_tiles.len());
 
     // p2
-    for n in 0..1 {
+    for _ in 0..100 {
         let mut next_state = flipped_tiles.clone();
         take_turn(
             &flipped_tiles,
@@ -165,14 +168,6 @@ fn main() -> Result<()> {
             &mut s_range,
         );
         flipped_tiles = next_state;
-        println!(
-            "{}: {} {:?} {:?} {:?}",
-            n + 1,
-            flipped_tiles.len(),
-            q_range,
-            r_range,
-            s_range
-        );
     }
 
     println!("{}", flipped_tiles.len());
